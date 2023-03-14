@@ -20,8 +20,8 @@ pub struct CreateUrlRouteParams {
 
 #[derive(Debug, Deserialize, Serialize, PartialEq, Eq)]
 pub struct CreateUrlResponse {
-    pub short_url_code: String,
     pub url: String,
+    pub short_url_code: String,
 }
 
 /// POST "/"
@@ -39,8 +39,8 @@ pub async fn create_url_endpoint(
     Ok((
         StatusCode::OK,
         Json(CreateUrlResponse {
-            short_url_code,
             url: payload.url,
+            short_url_code,
         }),
     ))
 }
