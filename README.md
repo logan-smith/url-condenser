@@ -1,7 +1,7 @@
 # URL Condenser
 
 A web framework built upon Axum using the Rust language.
-Provides shortened urls, and redirects requests for them.
+Provides url aliases, and redirects requests for them.
 
 # Table of Contents
 
@@ -14,8 +14,12 @@ Provides shortened urls, and redirects requests for them.
   - [Generating documentation](#generating-documentation)
   - [Endpoints](#endpoints)
     - [Healthcheck](#healthcheck)
-    - [Create Shortened URL](#create-shortened-url)
-    - [Use Short URL](#use-short-url)
+      - [Response](#response)
+    - [Create URL Alias](#create-url-alias)
+      - [Request](#request)
+      - [Response](#response-1)
+    - [Use URL Alias](#use-url-alias)
+      - [Response](#response-2)
   - [License](#license)
 
 ## Installation
@@ -88,7 +92,7 @@ Example:
 curl -X GET http://127.0.0.1:3000/health
 ```
 
-### Create Shortened URL
+### Create URL Alias
 
 Creates a URL alias. If user does not provide a `short_url_code`, one will be generated for them
 
@@ -99,7 +103,7 @@ Creates a URL alias. If user does not provide a `short_url_code`, one will be ge
 | Param          | Type   | Description                         | Required | Validations |
 | -------------- | ------ | ----------------------------------- | :------: | ----------- |
 | url            | String | The base url to create an alias for |   yes    | none        |
-| short_url_code | String | The shortened url alias             |    no    | none        |
+| short_url_code | String | The url alias                       |    no    | none        |
 
 #### Response
 
@@ -124,9 +128,9 @@ curl -X POST \
 }'
 ```
 
-### Use Short URL
+### Use URL Alias
 
-Redirects request from short URL to original provided long url
+Redirects request from alias URL to original provided long url
 
 `GET /{short_url_code}`
 
