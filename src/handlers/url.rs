@@ -34,22 +34,15 @@ pub async fn create_url_endpoint(
 
     let short_url_code = payload.short_url_code;
 
-    let response = urls.insert(short_url_code.clone(), payload.url.clone());
+    urls.insert(short_url_code.clone(), payload.url.clone());
 
-    if let Some(inserted_url) = response {
-        return Ok((
-            StatusCode::OK,
-            Json(CreateUrlResponse {
-                short_url_code,
-                url: inserted_url,
-            }),
-        ));
-    } else {
-        return Err(ApiError::InternalServerError(format!(
-            "Failed to create short url code for url: {:?}",
-            payload.url
-        )));
-    }
+    Ok((
+        StatusCode::OK,
+        Json(CreateUrlResponse {
+            short_url_code,
+            url: payload.url,
+        }),
+    ))
 }
 
 /// GET "/{shortened_url}"
@@ -75,19 +68,48 @@ pub fn generate_short_url() -> String {
     uuid::Uuid::new_v4().to_string()
 }
 
-// #[cfg(test)]
-// mod tests {
-//     use super::*;
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-//     #[tokio::test]
-//     async fn test_create_url() {
-//         let hashmap: HashMap<String, String> = HashMap::new();
-//         let request =
+    #[tokio::test]
+    async fn test_create_url() {
+        let hashmap: HashMap<String, String> = HashMap::new();
+        let url = "http://testurl.com";
+        let short_url_code = "testurl";
 
-//         let response = create_url_endpoint(State(hashmap), Json(request))
-//             .await
-//             .unwrap()
-//             .into_response();
-//         assert_eq!(response.status(), StatusCode::OK);
-//     }
-// }
+        let request = CreateUrlRouteParams {
+            url: url.to_string(),
+            short_url_code: short_url_code.to_string(),
+        };
+        let expected_response = CreateUrlResponse {
+            url: url.to_string(),
+            short_url_code: short_url_code.to_string(),
+        };
+
+        let response = create_url_endpoint(State(hashmap), Json(request))
+            .await
+            .unwrap()
+            .into_response();
+
+        assert_eq!(response.status(), StatusCode::OK);
+
+        let body = hyper::body::to_bytes(response.into_body()).await.unwrap();
+        let response_body: CreateUrlResponse = serde_json::from_slice(&body).unwrap();
+        assert_eq!(response_body, expected_response);
+    }
+
+    #[tokio::test]
+    async fn test_get_url() {
+        let mut hashmap: HashMap<String, String> = HashMap::new();
+        let short_url_code = "testurl";
+        hashmap.insert(short_url_code.to_string(), "http://testurl.com".to_string());
+
+        let response = get_url_endpoint(State(hashmap), Path(short_url_code.to_string()))
+            .await
+            .unwrap()
+            .into_response();
+
+        assert_eq!(response.status(), StatusCode::TEMPORARY_REDIRECT);
+    }
+}

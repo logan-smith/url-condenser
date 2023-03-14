@@ -16,7 +16,6 @@ pub struct Config {
     pub rust_backtrace: u8,
     pub rust_log: String,
     pub server: String,
-    pub api_url: String,
 }
 
 // Throw the Config struct into a CONFIG lazy_static to avoid multiple processing

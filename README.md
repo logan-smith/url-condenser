@@ -5,7 +5,7 @@ Provides shortened urls, and redirects requests for them.
 
 # Table of Contents
 
-- [API Exercise](#api-exercise)
+- [URL Condenser](#url-condenser)
 - [Table of Contents](#table-of-contents)
   - [Installation](#installation)
   - [Running the Server](#running-the-server)
@@ -29,7 +29,7 @@ Now add environment values for local development:
 
 ```ini
 RUST_BACKTRACE=0
-RUST_LOG="api_exercise=debug,axum=info"
+RUST_LOG="url_condenser=debug,axum=info"
 SERVER=127.0.0.1:8000
 ```
 
@@ -54,13 +54,13 @@ cargo test
 To build a Docker image of the application:
 
 ```shell
-docker build -t api_exercise .
+docker build -t url_condenser .
 ```
 
 Once the image is built, you can run the container in port 3000:
 
 ```shell
-docker run -it --rm --env-file=.env.docker -p 3000:3000 --name api_exercise api_exercise
+docker run -it --rm --env-file=.env.docker -p 3000:3000 --name url_condenser url_condenser
 ```
 
 ## Generating documentation

@@ -12,10 +12,10 @@ RUN sudo chown -R rust:rust /home/rust
 # Build our application.
 RUN cargo build --release
 
-# Now, we need to build our _real_ Docker container, copying in `api_exercise`.
+# Now, we need to build our _real_ Docker container, copying in `url_condenser`.
 FROM alpine:latest
 RUN apk --no-cache add ca-certificates
 COPY --from=builder \
-    /home/rust/src/target/x86_64-unknown-linux-musl/release/api_exercise \
+    /home/rust/src/target/x86_64-unknown-linux-musl/release/url_condenser \
     /usr/local/bin/
-CMD /usr/local/bin/api_exercise
+CMD /usr/local/bin/url_condenser
