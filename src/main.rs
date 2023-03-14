@@ -2,7 +2,7 @@ use axum::{
     routing::{get, post},
     Router,
 };
-use std::{collections::HashMap, net::SocketAddr};
+use std::{collections::HashMap, net::SocketAddr, sync::Arc, sync::RwLock};
 use tower_http::trace::TraceLayer;
 
 use crate::config::CONFIG;
@@ -41,7 +41,7 @@ async fn main() {
 }
 
 fn app() -> Router {
-    let urls: HashMap<String, String> = HashMap::new();
+    let shared_state = SharedState::default();
     let routes = Router::new()
         .route("/health", get(get_health_endpoint))
         .route("/:short_url_code", get(get_url_endpoint))
@@ -49,8 +49,15 @@ fn app() -> Router {
 
     let app = Router::new()
         .merge(routes)
-        .with_state(urls)
+        .with_state(Arc::clone(&shared_state))
         .layer(TraceLayer::new_for_http());
 
     app
+}
+
+type SharedState = Arc<RwLock<AppState>>;
+
+#[derive(Default)]
+pub struct AppState {
+    db: HashMap<String, String>,
 }

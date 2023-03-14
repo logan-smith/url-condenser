@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use axum::{
     extract::{Path, State},
     response::{IntoResponse, Redirect},
@@ -7,14 +5,14 @@ use axum::{
 };
 use http::StatusCode;
 
-use crate::{errors::ApiError, validate::validate};
+use crate::{errors::ApiError, validate::validate, SharedState};
 
 #[allow(non_snake_case)]
 #[derive(Debug, Deserialize, Serialize, Validate, PartialEq, Eq)]
 pub struct CreateUrlRouteParams {
     pub url: String,
-    #[serde(default = "generate_short_url")]
     // This will generate a short url code if the user does not provide their own
+    #[serde(default = "generate_short_url")]
     pub short_url_code: String,
 }
 
@@ -27,14 +25,17 @@ pub struct CreateUrlResponse {
 /// POST "/"
 /// Creates a shortened url
 pub async fn create_url_endpoint(
-    State(mut urls): State<HashMap<String, String>>,
+    State(state): State<SharedState>,
     Json(payload): Json<CreateUrlRouteParams>,
 ) -> Result<impl IntoResponse, ApiError> {
     validate(&payload)?;
-
     let short_url_code = payload.short_url_code;
 
-    urls.insert(short_url_code.clone(), payload.url.clone());
+    state
+        .write()
+        .unwrap()
+        .db
+        .insert(short_url_code.clone(), payload.url.clone());
 
     Ok((
         StatusCode::OK,
@@ -49,10 +50,11 @@ pub async fn create_url_endpoint(
 /// Makes a GET request to original url
 /// If short url code is requested that doesn't exist, a 404 error is returned
 pub async fn get_url_endpoint(
-    State(urls): State<HashMap<String, String>>,
     Path(short_url_code): Path<String>,
+    State(state): State<SharedState>,
 ) -> Result<impl IntoResponse, ApiError> {
-    let base_url = urls.get(&short_url_code);
+    let db = &state.read().unwrap().db;
+    let base_url = db.get(&short_url_code);
 
     if let Some(url) = base_url {
         let redirect = Redirect::temporary(&url.clone());
@@ -74,7 +76,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_create_url() {
-        let hashmap: HashMap<String, String> = HashMap::new();
+        let shared_state = SharedState::default();
         let url = "http://testurl.com";
         let short_url_code = "testurl";
 
@@ -87,7 +89,7 @@ mod tests {
             short_url_code: short_url_code.to_string(),
         };
 
-        let response = create_url_endpoint(State(hashmap), Json(request))
+        let response = create_url_endpoint(State(shared_state), Json(request))
             .await
             .unwrap()
             .into_response();
@@ -101,11 +103,15 @@ mod tests {
 
     #[tokio::test]
     async fn test_get_url() {
-        let mut hashmap: HashMap<String, String> = HashMap::new();
         let short_url_code = "testurl";
-        hashmap.insert(short_url_code.to_string(), "http://testurl.com".to_string());
+        let shared_state = SharedState::default();
+        shared_state
+            .write()
+            .unwrap()
+            .db
+            .insert(short_url_code.to_string(), "http://testurl.com".to_string());
 
-        let response = get_url_endpoint(State(hashmap), Path(short_url_code.to_string()))
+        let response = get_url_endpoint(Path(short_url_code.to_string()), State(shared_state))
             .await
             .unwrap()
             .into_response();

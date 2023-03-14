@@ -90,7 +90,7 @@ curl -X GET http://127.0.0.1:3000/health
 
 ### Create Shortened URL
 
-Creates a URL alias
+Creates a URL alias. If user does not provide a `short_url_code`, one will be generated for them
 
 `POST /`
 
@@ -120,7 +120,7 @@ curl -X POST \
   -H 'Content-Type: application/json' \
   -d '{
     "url": "http://www.google.com",
-    "short_url_code": "sample-url",
+    "short_url_code": "sample-url"
 }'
 ```
 
