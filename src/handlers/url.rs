@@ -58,11 +58,11 @@ pub async fn get_url_endpoint(
 
     if let Some(url) = base_url {
         let redirect = Redirect::temporary(&url.clone());
-        return Ok(redirect);
+        Ok(redirect)
     } else {
-        return Err(ApiError::NotFound(
+        Err(ApiError::NotFound(
             "The short url code you requested does not exist".to_string(),
-        ));
+        ))
     }
 }
 

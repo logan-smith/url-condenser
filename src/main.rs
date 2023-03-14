@@ -47,12 +47,10 @@ fn app() -> Router {
         .route("/:short_url_code", get(get_url_endpoint))
         .route("/", post(create_url_endpoint));
 
-    let app = Router::new()
+    Router::new()
         .merge(routes)
         .with_state(Arc::clone(&shared_state))
-        .layer(TraceLayer::new_for_http());
-
-    app
+        .layer(TraceLayer::new_for_http())
 }
 
 type SharedState = Arc<RwLock<AppState>>;
