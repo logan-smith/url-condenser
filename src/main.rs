@@ -2,13 +2,17 @@ use axum::{
     routing::{get, post},
     Router,
 };
+use diesel::{pg::PgConnection, r2d2::ConnectionManager};
 use std::{collections::HashMap, net::SocketAddr, sync::Arc, sync::RwLock};
 use tower_http::trace::TraceLayer;
 
 use crate::config::CONFIG;
+use crate::database::*;
 use crate::handlers::health::get_health_endpoint;
-use crate::handlers::url::{create_url_endpoint, get_url_endpoint};
+use crate::handlers::url::{create_alias_endpoint, get_alias_endpoint};
 
+#[macro_use]
+extern crate diesel;
 #[macro_use]
 extern crate lazy_static;
 #[macro_use]
@@ -17,8 +21,11 @@ extern crate serde_derive;
 extern crate validator_derive;
 
 pub mod config;
+pub mod database;
 pub mod errors;
 pub mod handlers;
+pub mod models;
+pub mod schema;
 pub mod tests;
 pub mod validate;
 
@@ -41,21 +48,28 @@ async fn main() {
 }
 
 fn app() -> Router {
-    let shared_state = SharedState::default();
+    // DB connection setup
+    let config = CONFIG.clone();
+    let manager = ConnectionManager::<PgConnection>::new(config.database_url);
+    let pool = Pool::builder()
+        .build(manager)
+        .expect("Failed to create database connection pool");
+    let db_conn = pool;
+
     let routes = Router::new()
         .route("/health", get(get_health_endpoint))
-        .route("/:short_url_code", get(get_url_endpoint))
-        .route("/", post(create_url_endpoint));
+        .route("/:short_url_code", get(get_alias_endpoint))
+        .route("/", post(create_alias_endpoint));
 
     Router::new()
         .merge(routes)
-        .with_state(Arc::clone(&shared_state))
+        .with_state(db_conn)
         .layer(TraceLayer::new_for_http())
 }
 
-type SharedState = Arc<RwLock<AppState>>;
+// type SharedState = Arc<RwLock<AppState>>;
 
-#[derive(Default)]
-pub struct AppState {
-    db: HashMap<String, String>,
-}
+// #[derive(Default)]
+// pub struct AppState {
+//     db: HashMap<String, String>,
+// }
