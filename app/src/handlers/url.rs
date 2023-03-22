@@ -49,7 +49,6 @@ pub async fn create_alias_endpoint(
             short_url_code: res.short_url_code,
         }),
     ))
-    // Ok((StatusCode::OK, "string"))
 }
 
 /// GET "/{shortened_url}"

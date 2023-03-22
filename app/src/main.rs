@@ -48,6 +48,7 @@ async fn app() -> Router {
     let db_conn = Database::connect(config.database_url)
         .await
         .expect("Database connection failed");
+
     // Run migrations
     Migrator::up(&db_conn, None).await.unwrap();
 
