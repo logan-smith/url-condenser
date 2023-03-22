@@ -33,12 +33,19 @@ touch .env
 Now add environment values for local development:
 
 ```ini
+DATABASE_URL=postgresql://username:password@localhost:5432/url-condenser
 RUST_BACKTRACE=0
 RUST_LOG="url_condenser=debug,axum=info"
 SERVER=127.0.0.1:8000
 ```
 
 ## Running the Server
+
+First you must run Postgres in docker:
+
+```shell
+docker-compose up
+```
 
 To startup the server:
 
