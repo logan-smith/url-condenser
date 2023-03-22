@@ -2,12 +2,12 @@ use axum::{
     routing::{get, post},
     Router,
 };
+use migration::{Migrator, MigratorTrait};
 use sea_orm::{Database, DatabaseConnection};
-use std::{collections::HashMap, net::SocketAddr, sync::Arc, sync::RwLock};
+use std::net::SocketAddr;
 use tower_http::trace::TraceLayer;
 
 use crate::config::CONFIG;
-// use crate::database::*;
 use crate::handlers::health::get_health_endpoint;
 use crate::handlers::url::{create_alias_endpoint, get_alias_endpoint};
 
@@ -19,10 +19,8 @@ extern crate serde_derive;
 extern crate validator_derive;
 
 pub mod config;
-// pub mod database;
 pub mod errors;
 pub mod handlers;
-// pub mod schema;
 pub mod tests;
 pub mod validate;
 
@@ -51,10 +49,9 @@ async fn app() -> Router {
         .await
         .expect("Database connection failed");
     // Run migrations
-    // Migrator::up(&conn, None).await.unwrap();
+    Migrator::up(&db_conn, None).await.unwrap();
 
     let state = AppState { db_conn };
-    // let state: SharedState = Arc::new(RwLock::new(state));
 
     let routes = Router::new()
         .route("/health", get(get_health_endpoint))
@@ -66,21 +63,6 @@ async fn app() -> Router {
         .with_state(state)
         .layer(TraceLayer::new_for_http())
 }
-
-// type SharedState = Arc<RwLock<AppState>>;
-// type SharedDb = Arc<RwLock<DatabaseConnection
-
-// #[cfg(not(test))]
-// #[derive(Default, Clone)]
-// pub struct AppState {
-//     db_conn: DatabaseConnection,
-// }
-
-// #[cfg(test)]
-// #[derive(Default)]
-// pub struct AppState {
-//     db_conn: DatabaseConnection,
-// }
 
 #[derive(Clone)]
 pub struct AppState {
