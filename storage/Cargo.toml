@@ -1,0 +1,32 @@
+[package]
+name = "storage"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+entity = { path = "../entity" }
+serde = { version = "1.0", features = ["derive"] }
+serde_derive = "1.0"
+
+[dependencies.sea-orm]
+version = "^0" # sea-orm version
+features = [
+    "debug-print",
+    "runtime-tokio-native-tls",
+    "sqlx-postgres",
+    # "sqlx-mysql",
+    # "sqlx-sqlite",
+]
+
+[dev-dependencies]
+tokio = { version = "1.20.0", features = ["macros", "rt"] }
+
+[features]
+mock = ["sea-orm/mock"]
+
+# defines test runner main function called "url"
+[[test]]
+name = "url"
+required-features = ["mock"]
