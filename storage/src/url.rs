@@ -17,6 +17,13 @@ pub async fn create_url(db: &DbConn, data: CreateUrl) -> Result<url::Model, DbEr
     .await
 }
 
+pub async fn get_url_by_code(db: &DbConn, code: String) -> Result<Option<url::Model>, DbErr> {
+    url::Entity::find()
+        .filter(url::Column::ShortUrlCode.contains(&code))
+        .one(db)
+        .await
+}
+
 #[cfg(test)]
 mod tests {
     #[tokio::test]

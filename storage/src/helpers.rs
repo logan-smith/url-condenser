@@ -1,5 +1,6 @@
 use ::entity::url;
 
+#[allow(dead_code)]
 pub fn url_model() -> url::Model {
     url::Model {
         id: 15,
