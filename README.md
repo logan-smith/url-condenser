@@ -73,13 +73,13 @@ cargo test --features mock
 To build a Docker image of the application:
 
 ```shell
-docker build -t url_condenser .
+docker build -t url-condenser .
 ```
 
 Once the image is built, you can run the container in port 3000:
 
 ```shell
-docker run -it --rm --env-file=.env.docker -p 3000:3000 --name url_condenser url_condenser
+docker run -it --rm --env-file=.env.docker -p 3000:3000 --name url-condenser url-condenser
 ```
 
 ## Generating documentation

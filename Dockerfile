@@ -1,23 +1,16 @@
-FROM rustlang/rust:latest AS chef
-# We only pay the installation cost once,
-# it will be cached from the second build onwards
-RUN cargo install cargo-chef
+FROM rust:latest AS builder
+COPY . /
+WORKDIR /
 
-WORKDIR app
+RUN cargo build --release
 
-FROM chef AS planner
-COPY . .
-RUN cargo chef prepare --recipe-path recipe.json
+# use slim ubuntu build
+FROM ubuntu:20.04 AS candidate
 
-FROM chef AS builder
-COPY --from=planner /app/recipe.json recipe.json
-# Build dependencies - this is the caching Docker layer!
-RUN cargo chef cook --release --recipe-path recipe.json
+COPY --from=builder ./target/release ./target/release
 
-# Build application
-COPY . .
-RUN cargo install --path .
+# INSTALL SYSTEM DEPENDENCIES
+RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y ca-certificates libssh-4 openssl libpq-dev libssl-dev libsasl2-dev curl && update-ca-certificates
 
-# We do not need the Rust toolchain to run the binary!
-FROM gcr.io/distroless/cc-debian11
-COPY --from=builder /usr/local/cargo/bin/* /usr/local/bin
+
+CMD ["/target/release/url-condenser"]
