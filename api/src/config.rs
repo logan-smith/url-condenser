@@ -9,6 +9,7 @@
 //! multiple processing.
 
 use dotenv::dotenv;
+use lazy_static::lazy_static;
 use serde::Deserialize;
 
 #[derive(Clone, Deserialize, Debug)]

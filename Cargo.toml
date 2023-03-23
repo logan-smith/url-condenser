@@ -1,2 +1,12 @@
+[package]
+name = "url-condenser"
+version = "0.1.0"
+authors = ["Logan Smith <contact@logansmith.net"]
+edition = "2021"
+publish = false
+
 [workspace]
-members = ["app", "entity", "migration", "storage"]
+members = [".", "api", "storage", "entity", "migration"]
+
+[dependencies]
+api = { path = "api" }

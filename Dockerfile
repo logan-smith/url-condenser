@@ -1,21 +1,23 @@
-ARG BASE_IMAGE=ekidd/rust-musl-builder:latest
+FROM rustlang/rust:latest AS chef
+# We only pay the installation cost once,
+# it will be cached from the second build onwards
+RUN cargo install cargo-chef
 
-# Our first FROM statement declares the build environment.
-FROM ${BASE_IMAGE} AS builder
+WORKDIR app
 
-# Add our source code.
-ADD . ./
+FROM chef AS planner
+COPY . .
+RUN cargo chef prepare --recipe-path recipe.json
 
-# Fix permissions on source code.
-RUN sudo chown -R rust:rust /home/rust
+FROM chef AS builder
+COPY --from=planner /app/recipe.json recipe.json
+# Build dependencies - this is the caching Docker layer!
+RUN cargo chef cook --release --recipe-path recipe.json
 
-# Build our application.
-RUN cargo build --release
+# Build application
+COPY . .
+RUN cargo install --path .
 
-# Now, we need to build our _real_ Docker container, copying in `url_condenser`.
-FROM alpine:latest
-RUN apk --no-cache add ca-certificates
-COPY --from=builder \
-    /home/rust/src/target/x86_64-unknown-linux-musl/release/url_condenser \
-    /usr/local/bin/
-CMD /usr/local/bin/url_condenser
+# We do not need the Rust toolchain to run the binary!
+FROM gcr.io/distroless/cc-debian11
+COPY --from=builder /usr/local/cargo/bin/* /usr/local/bin

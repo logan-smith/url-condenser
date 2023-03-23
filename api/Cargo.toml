@@ -1,7 +1,6 @@
 [package]
-name = "url-condenser"
+name = "api"
 version = "0.1.0"
-resolver = "2"
 authors = ["Logan Smith <contact@logansmith.net"]
 readme = "README.md"
 keywords = ["axum", "framework"]
@@ -17,7 +16,6 @@ envy = "0.4"
 http = "0.2"
 lazy_static = "1.4"
 log = "0.4"
-r2d2 = "0.8"
 reqwest = "0.11.14"
 sea-orm = { version = "0.11.0", features = [ "sqlx-postgres", "runtime-tokio-native-tls", "macros" ] }
 serde = { version = "1.0", features = ["derive"] }
@@ -27,7 +25,6 @@ tokio = { version = "1.0", features = ["full"] }
 tower-http = { version = "0.4", features = ["cors", "trace"] }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
-uuid = { version = "1.3", features = ["serde", "v4"] }
 validator = "0.16.0"
 validator_derive = "0.16.0"
 

@@ -12,8 +12,6 @@ use crate::handlers::health::get_health_endpoint;
 use crate::handlers::url::{create_alias_endpoint, get_alias_endpoint};
 
 #[macro_use]
-extern crate lazy_static;
-#[macro_use]
 extern crate serde_derive;
 #[macro_use]
 extern crate validator_derive;
@@ -25,7 +23,7 @@ pub mod tests;
 pub mod validate;
 
 #[tokio::main]
-async fn main() {
+pub async fn main() {
     dotenv::dotenv().ok();
     tracing_subscriber::fmt::init();
     let config = CONFIG.clone();
