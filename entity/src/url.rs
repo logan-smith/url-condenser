@@ -10,7 +10,6 @@ pub struct Model {
     #[sea_orm(primary_key)]
     pub id: i32,
     pub url: String,
-    pub short_url_code: String,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
@@ -20,8 +19,6 @@ impl ActiveModelBehavior for ActiveModel {}
 
 pub struct CreateAliasRouteParams {
     pub url: String,
-    // This will generate a short url code if the user does not provide their own
-    pub short_url_code: String,
 }
 
 impl From<CreateAliasRouteParams> for ActiveModel {
@@ -29,7 +26,6 @@ impl From<CreateAliasRouteParams> for ActiveModel {
         Self {
             id: sea_orm::ActiveValue::NotSet,
             url: sea_orm::ActiveValue::Set(params.url),
-            short_url_code: sea_orm::ActiveValue::Set(params.short_url_code),
         }
     }
 }

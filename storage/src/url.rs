@@ -4,25 +4,27 @@ use sea_orm::*;
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
 pub struct CreateUrl {
     pub url: String,
-    pub short_url_code: String,
 }
 
 pub async fn create_url(db: &DbConn, data: CreateUrl) -> Result<url::Model, DbErr> {
     url::ActiveModel {
         id: NotSet,
         url: Set(data.url.to_owned()),
-        short_url_code: Set(data.short_url_code.to_owned()),
     }
     .insert(db)
     .await
 }
 
-pub async fn get_url_by_code(db: &DbConn, code: String) -> Result<Option<url::Model>, DbErr> {
-    url::Entity::find()
-        .filter(url::Column::ShortUrlCode.contains(&code))
-        .one(db)
-        .await
+pub async fn get_url(db: &DbConn, id: i32) -> Result<Option<url::Model>, DbErr> {
+    url::Entity::find_by_id(id).one(db).await
 }
+
+// pub async fn get_url_by_code(db: &DbConn, code: String) -> Result<Option<url::Model>, DbErr> {
+//     url::Entity::find()
+//         .filter(url::Column::ShortUrlCode.contains(&code))
+//         .one(db)
+//         .await
+// }
 
 #[cfg(test)]
 mod tests {

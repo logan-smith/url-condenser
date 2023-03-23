@@ -4,24 +4,18 @@ use axum::{
     Json,
 };
 use http::StatusCode;
-use storage::{create_url, get_url_by_code, CreateUrl};
+use storage::{create_url, get_url, CreateUrl};
 
 use crate::{errors::ApiError, validate::validate, AppState};
 
 #[derive(Clone, Debug, Deserialize, Serialize, Validate, PartialEq, Eq)]
 pub struct CreateAliasRouteParams {
     pub url: String,
-    // This will generate a short url code if the user does not provide their own
-    #[serde(default = "generate_short_url")]
-    pub short_url_code: String,
 }
 
 impl From<CreateAliasRouteParams> for CreateUrl {
     fn from(params: CreateAliasRouteParams) -> Self {
-        Self {
-            url: params.url,
-            short_url_code: params.short_url_code,
-        }
+        Self { url: params.url }
     }
 }
 
@@ -40,13 +34,14 @@ pub async fn create_alias_endpoint(
     validate(&payload)?;
     let new_url = payload.clone();
 
-    let res = create_url(&state.db_conn, new_url.into()).await.unwrap(); // todo: seorm error handling
+    let res = create_url(&state.db_conn, new_url.into()).await?;
+    let url_code = format!("{:x}", res.id);
 
     Ok((
         StatusCode::OK,
         Json(CreateAliasResponse {
             url: res.url,
-            short_url_code: res.short_url_code,
+            short_url_code: url_code,
         }),
     ))
 }
@@ -58,20 +53,15 @@ pub async fn get_alias_endpoint(
     Path(short_url_code): Path<String>,
     State(state): State<AppState>,
 ) -> Result<impl IntoResponse, ApiError> {
-    let response = get_url_by_code(&state.db_conn, short_url_code)
-        .await
-        .unwrap();
+    let url_code = i32::from_str_radix(&short_url_code, 16)?;
+    let response = get_url(&state.db_conn, url_code).await?;
 
     if let Some(response) = response {
         let redirect = Redirect::temporary(&response.url.clone());
         Ok(redirect)
     } else {
         Err(ApiError::NotFound(
-            "The short url code you requested does not exist".to_string(),
+            "The url alias you requested does not exist.".to_string(),
         ))
     }
-}
-
-pub fn generate_short_url() -> String {
-    uuid::Uuid::new_v4().to_string()
 }

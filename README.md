@@ -39,13 +39,13 @@ RUST_LOG="url_condenser=debug,axum=info"
 SERVER=127.0.0.1:8000
 ```
 
-## Running the Server
-
-First you must run Postgres in docker:
+To run the server or tests, you must have Postgres running:
 
 ```shell
 docker-compose up
 ```
+
+## Running the Server
 
 To startup the server:
 
@@ -59,6 +59,13 @@ To run all of the tests:
 
 ```shell
 cargo test
+```
+
+To run the Storage tests without needing Postgres running:
+
+```shell
+cd storage
+cargo test --features mock
 ```
 
 ## Docker
@@ -101,16 +108,15 @@ curl -X GET http://127.0.0.1:3000/health
 
 ### Create URL Alias
 
-Creates a URL alias. If user does not provide a `short_url_code`, one will be generated for them
+Creates a URL alias.
 
 `POST /`
 
 #### Request
 
-| Param          | Type   | Description                         | Required | Validations |
-| -------------- | ------ | ----------------------------------- | :------: | ----------- |
-| url            | String | The base url to create an alias for |   yes    | none        |
-| short_url_code | String | The url alias                       |    no    | none        |
+| Param | Type   | Description                         | Required | Validations |
+| ----- | ------ | ----------------------------------- | :------: | ----------- |
+| url   | String | The base url to create an alias for |   yes    | none        |
 
 #### Response
 
@@ -119,7 +125,7 @@ Creates a URL alias. If user does not provide a `short_url_code`, one will be ge
 ```json
 {
   "url": "http://www.google.com",
-  "short_url_code": "sample-url"
+  "short_url_code": "1"
 }
 ```
 
@@ -130,8 +136,7 @@ curl -X POST \
   http://127.0.0.1:8000/ \
   -H 'Content-Type: application/json' \
   -d '{
-    "url": "http://www.google.com",
-    "short_url_code": "sample-url"
+    "url": "http://www.google.com"
 }'
 ```
 
@@ -148,7 +153,7 @@ Redirects request from alias URL to original provided long url
 Example:
 
 ```shell
-curl -X GET http://127.0.0.1:8000/sample-url
+curl -X GET http://127.0.0.1:8000/1
 ```
 
 ## License

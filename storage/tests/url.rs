@@ -14,7 +14,6 @@ async fn main() {
 
         let request = CreateUrl {
             url: test_model.url.to_string(),
-            short_url_code: test_model.short_url_code.to_string(),
         };
 
         let response = create_url(&db, request).await.unwrap();
