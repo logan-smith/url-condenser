@@ -14,6 +14,7 @@ pub enum ApiError {
     CacheError(String),
     CannotDecodeJwtToken(String),
     CannotEncodeJwtToken(String),
+    DatabaseError(String),
     InternalServerError(String),
     NotFound(String),
     ParseError(String),
@@ -58,6 +59,20 @@ impl From<serde_json::Error> for ApiError {
     fn from(error: serde_json::Error) -> ApiError {
         error!("Serde Json Error {:?}", error);
         ApiError::SerdeJsonError(error.to_string())
+    }
+}
+
+impl From<sea_orm::error::DbErr> for ApiError {
+    fn from(error: sea_orm::error::DbErr) -> ApiError {
+        error!("Seaorm Error {:?}", error);
+        ApiError::DatabaseError(error.to_string())
+    }
+}
+
+impl From<std::num::ParseIntError> for ApiError {
+    fn from(error: std::num::ParseIntError) -> ApiError {
+        error!("Error parsing url code into hex string {:?}", error);
+        ApiError::InternalServerError(error.to_string())
     }
 }
 

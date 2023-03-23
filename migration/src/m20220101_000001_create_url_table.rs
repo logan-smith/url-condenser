@@ -3,12 +3,6 @@ use sea_orm_migration::prelude::*;
 #[derive(DeriveMigrationName)]
 pub struct Migration;
 
-// impl MigrationName for Migration {
-//     fn name(&self) -> &str {
-//         "m20220101_000001_create_url_table"
-//     }
-// }
-
 #[async_trait::async_trait]
 impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
@@ -25,7 +19,6 @@ impl MigrationTrait for Migration {
                             .primary_key(),
                     )
                     .col(ColumnDef::new(Urls::Url).string().not_null())
-                    .col(ColumnDef::new(Urls::ShortUrlCode).string().not_null())
                     .to_owned(),
             )
             .await
@@ -44,5 +37,4 @@ enum Urls {
     Table,
     Id,
     Url,
-    ShortUrlCode,
 }
